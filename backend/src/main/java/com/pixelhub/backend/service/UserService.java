@@ -33,6 +33,7 @@ public class UserService {
         }
         User user = new User();
         user.setNickname(username);
+        user.setPixelCount(0L);
         user.setLastPlacedAt(Instant.now().minusSeconds(rateLimitSeconds));
         return userRepository.save(user);
     }
