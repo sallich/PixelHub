@@ -1,0 +1,34 @@
+<header class="top-bar">
+  <div class="brand">
+    <h1>PixelHub</h1>
+    <span class="tagline">Collaborative Pixel Art</span>
+  </div>
+  <div class="controls">
+    <div class="color-picker">
+      <button
+        *ngFor="let color of palette; index as idx"
+        type="button"
+        [style.backgroundColor]="color"
+        [class.selected]="selectedColor() === idx"
+        (click)="selectColor(idx)"
+      ></button>
+    </div>
+    <div class="cooldown">
+      <span class="label">Cooldown:</span>
+      <span class="value" [class.ready]="!cooldownActive()" [class.waiting]="cooldownActive()">
+        {{ cooldownLabel() }}
+      </span>
+    </div>
+    <button
+      type="button"
+      [class.primary]="placingEnabled()"
+      [class.secondary]="!placingEnabled()"
+      (click)="togglePlacement()"
+    >
+      {{ placingEnabled() ? 'Place Pixel' : 'Pan Only' }}
+    </button>
+    <button type="button" class="secondary" (click)="onOpenSettings()">Settings</button>
+  </div>
+</header>
+
+

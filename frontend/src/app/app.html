@@ -1,0 +1,12 @@
+<div id="app">
+  <app-toolbar (openSettings)="openSettings()"></app-toolbar>
+  <main class="layout">
+    <app-canvas-board (authRequired)="requestAuth()"></app-canvas-board>
+    <app-sidebar (changeNickname)="openAuthDialog()"></app-sidebar>
+  </main>
+</div>
+
+<app-auth-dialog (authenticated)="handleAuthenticated()"></app-auth-dialog>
+<app-settings-dialog (settingsSaved)="handleSettingsSaved($event)"></app-settings-dialog>
+
+

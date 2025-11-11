@@ -18,7 +18,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AuthChannelInterceptor implements ChannelInterceptor {
 
-    private JwtService jwtService;
+    private final JwtService jwtService;
 
     @Override
     public Message<?> preSend(Message<?> message, MessageChannel channel) {
