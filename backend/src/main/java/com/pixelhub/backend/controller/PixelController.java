@@ -1,5 +1,6 @@
 package com.pixelhub.backend.controller;
 
+import com.pixelhub.backend.model.dto.BoardResponse;
 import com.pixelhub.backend.model.dto.PixelDto;
 import com.pixelhub.backend.model.dto.WebSocketMessage;
 import com.pixelhub.backend.service.PixelService;
@@ -7,8 +8,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.security.Principal;
+import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
@@ -23,5 +27,13 @@ public class PixelController {
         }
     }
 
-    //TODO: add GET full-board endpoint
+    @ResponseBody
+    @GetMapping("/full-board")
+    public BoardResponse getFullBoard() {
+        List<PixelDto> pixelDtos = pixelService.getFullBoard().stream()
+                .map(p -> new PixelDto(p.getX(), p.getY(), p.getColor()))
+                .toList();
+
+        return new BoardResponse(pixelDtos);
+    }
 }

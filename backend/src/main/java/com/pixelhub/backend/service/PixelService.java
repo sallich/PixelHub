@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -60,6 +61,10 @@ public class PixelService {
             WebSocketMessage<PixelDto> broadcastMessage = new WebSocketMessage<>("get", request);
             messagingTemplate.convertAndSend("/topic/pixels", broadcastMessage);
         });
+    }
+
+    public List<Pixel> getFullBoard() {
+        return pixelRepository.findAll();
     }
 
     private boolean isValid(PixelDto request) {
