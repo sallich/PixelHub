@@ -24,15 +24,15 @@ public class PixelService {
     private final SimpMessagingTemplate messagingTemplate;
 
     @Value("${app.rate-limit-seconds:30}")
-    private static int RATE_LIMIT_SECONDS;
+    private int RATE_LIMIT_SECONDS;
     @Value("${app.canvas-width:2000}")
-    private static int CANVAS_WIDTH;
+    private int CANVAS_WIDTH;
     @Value("${app.canvas-height:2000}")
-    private static int CANVAS_HEIGHT;
+    private int CANVAS_HEIGHT;
     @Value("${app.min-color:0}")
-    private static int MIN_COLOR;
+    private int MIN_COLOR;
     @Value("${app.max-color:127}")
-    private static int MAX_COLOR;
+    private int MAX_COLOR;
 
 
     @Transactional
@@ -64,7 +64,11 @@ public class PixelService {
     }
 
     public List<Pixel> getFullBoard() {
-        return pixelRepository.findAll();
+        return pixelRepository.findCurrentBoardState();
+    }
+
+    public List<Pixel> getBoardStateAtTime(Instant timestamp) {
+        return pixelRepository.findBoardStateAtTime(timestamp);
     }
 
     private boolean isValid(PixelDto request) {
