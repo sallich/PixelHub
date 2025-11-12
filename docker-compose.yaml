@@ -52,7 +52,7 @@ services:
       dockerfile: Dockerfile
     container_name: pixelhub-frontend
     ports:
-      - "4200:80"
+      - "80:80"
     networks:
       - app-network
 
