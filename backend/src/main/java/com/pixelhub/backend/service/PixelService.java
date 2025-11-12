@@ -34,7 +34,6 @@ public class PixelService {
     @Value("${app.max-color:127}")
     private int maxColor;
 
-
     @Transactional
     public void placePixel(PixelDto request, String nickname) {
         if (!isValid(request)) {
@@ -64,7 +63,11 @@ public class PixelService {
     }
 
     public List<Pixel> getFullBoard() {
-        return pixelRepository.findAll();
+        return pixelRepository.findCurrentBoardState();
+    }
+
+    public List<Pixel> getBoardStateAtTime(Instant timestamp) {
+        return pixelRepository.findBoardStateAtTime(timestamp);
     }
 
     private boolean isValid(PixelDto request) {
