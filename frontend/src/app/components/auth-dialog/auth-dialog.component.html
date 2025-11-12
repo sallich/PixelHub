@@ -1,0 +1,37 @@
+<dialog #dialog>
+  <form (submit)="submit(); $event.preventDefault();">
+    <h2>Join the Canvas</h2>
+    <label for="nicknameInput">
+      Nickname
+      <input
+        id="nicknameInput"
+        name="nickname"
+        type="text"
+        minlength="2"
+        maxlength="24"
+        required
+        [ngModel]="formModel().nickname"
+        (ngModelChange)="updateNickname($event)"
+      />
+    </label>
+    <label for="apiBaseInput">
+      API Base URL
+      <input
+        id="apiBaseInput"
+        name="apiBase"
+        type="url"
+        placeholder="http://localhost:8080"
+        [ngModel]="formModel().apiBase"
+        (ngModelChange)="updateApiBase($event)"
+      />
+    </label>
+    <p class="auth-error" *ngIf="authError()">{{ authError() }}</p>
+    <p class="help-text">Your nickname is used as an auth token for this demo backend.</p>
+    <menu>
+      <button type="button" class="secondary" (click)="close()">Cancel</button>
+      <button type="submit" class="primary" [disabled]="isAuthenticating()">Save</button>
+    </menu>
+  </form>
+</dialog>
+
+

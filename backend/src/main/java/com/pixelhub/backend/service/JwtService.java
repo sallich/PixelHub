@@ -49,9 +49,13 @@ public class JwtService {
 
     public String refreshToken(String token, String username) {
         try {
-            return parser.parseClaimsJws(token).getBody().getSubject();
+            String subject = parser.parseClaimsJws(token).getBody().getSubject();
+            validateSubject(subject, username);
+            return generateToken(subject);
         } catch (ExpiredJwtException expiredJwtException) {
-            return generateToken(expiredJwtException.getClaims().getSubject());
+            String subject = expiredJwtException.getClaims().getSubject();
+            validateSubject(subject, username);
+            return generateToken(subject);
         } catch (Exception e) {
             throw new TokenParseException(e.getMessage());
         }
@@ -62,6 +66,12 @@ public class JwtService {
             return Optional.of(parser.parseClaimsJws(token).getBody().getSubject());
         } catch (Exception e) {
             return Optional.empty();
+        }
+    }
+
+    private void validateSubject(String tokenSubject, String expectedNickname) {
+        if (!tokenSubject.equals(expectedNickname)) {
+            throw new TokenParseException("Token subject mismatch");
         }
     }
 }
