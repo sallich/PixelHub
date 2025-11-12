@@ -24,6 +24,18 @@ export class BoardApiService {
     );
   }
 
+  async fetchBoardHistory(token: string, timestamp: string): Promise<BoardResponse> {
+    const url = this.resolveUrl('/board-history');
+    const params = { timestamp };
+    const response = await firstValueFrom(
+      this.http.get<BoardResponse>(url, {
+        headers: this.buildAuthHeaders(token),
+        params
+      })
+    );
+    return response;
+  }
+
   private resolveUrl(path: string): string {
     const base = this.configService.config().apiBase.replace(/\/+$/, '');
     const normalized = path.startsWith('/') ? path : `/${path}`;

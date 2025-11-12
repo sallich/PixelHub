@@ -32,9 +32,13 @@ export class CanvasStateService {
   private offscreenCtx: CanvasRenderingContext2D | null = null;
   private imageData: ImageData | null = null;
   private imageRevision = signal(0);
+  private readonly _historyMode = signal(false);
+  private readonly _historyTimestamp = signal<string | null>(null);
 
   readonly selectedColor = computed(() => this._selectedColor());
   readonly revision = computed(() => this.imageRevision());
+  readonly historyMode = computed(() => this._historyMode());
+  readonly historyTimestamp = computed(() => this._historyTimestamp());
 
   initializeBoard(config: Pick<AppConfig, 'canvasWidth' | 'canvasHeight'>): void {
     this.boardWidth = config.canvasWidth;
@@ -127,6 +131,16 @@ export class CanvasStateService {
       pixel.c >= 0 &&
       pixel.c < this.palette.length
     );
+  }
+
+  setHistoryMode(enabled: boolean, timestamp: string | null = null): void {
+    this._historyMode.set(enabled);
+    this._historyTimestamp.set(timestamp);
+  }
+
+  resetToCurrent(): void {
+    this._historyMode.set(false);
+    this._historyTimestamp.set(null);
   }
 
   private commitImageData(): void {

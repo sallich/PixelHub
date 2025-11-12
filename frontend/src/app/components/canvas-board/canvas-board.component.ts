@@ -21,6 +21,7 @@ import { StatusService } from '../../core/services/status.service';
 import { BoardLoaderService } from '../../core/services/board-loader.service';
 import { CooldownService } from '../../core/services/cooldown.service';
 import { UserStateService } from '../../core/services/user-state.service';
+import { HistoryControlComponent } from '../history-control/history-control.component';
 
 const MIN_ZOOM = 0.25;
 const MAX_ZOOM = 40;
@@ -33,7 +34,7 @@ interface PointerState {
 @Component({
   selector: 'app-canvas-board',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, HistoryControlComponent],
   templateUrl: './canvas-board.component.html',
   styleUrl: './canvas-board.component.scss'
 })
@@ -70,11 +71,19 @@ export class CanvasBoardComponent implements AfterViewInit {
   readonly cooldownActive = computed(() => this.cooldownService.isActive());
   readonly cooldownLabel = computed(() => {
     const remaining = this.cooldownService.remainingSeconds();
-    return remaining > 0 ? `${remaining}s` : 'Ready';
+    if (remaining <= 0) {
+      return 'Ready';
+    }
+    // Форматируем с одной десятичной цифрой, всегда показывая одну цифру после запятой
+    const formatted = remaining.toFixed(1);
+    // Убираем .0 если это целое число для красоты
+    return formatted.endsWith('.0') ? `${Math.floor(remaining)}s` : `${formatted}s`;
   });
   readonly nickname = computed(() => this.userState.nickname());
   readonly pixelCount = computed(() => this.userState.pixelCount());
   readonly showOverlayCards = signal(true);
+  readonly historyMode = computed(() => this.canvasState.historyMode());
+  readonly historyTimestamp = computed(() => this.canvasState.historyTimestamp());
   readonly hoverStyle = computed(() => {
     const pixel = this.hoverPixel();
     const scale = this.scale();
@@ -150,6 +159,18 @@ export class CanvasBoardComponent implements AfterViewInit {
     }
 
     this.showOverlayCards.update((value) => !value);
+  }
+
+  getHistoryDisplayTime(): string {
+    const timestamp = this.historyTimestamp();
+    if (!timestamp) {
+      return '';
+    }
+    try {
+      return new Date(timestamp).toLocaleString();
+    } catch {
+      return timestamp;
+    }
   }
 
   gotoX = '';

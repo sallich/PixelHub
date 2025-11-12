@@ -5,6 +5,7 @@ import com.pixelhub.backend.model.dto.PixelDto;
 import com.pixelhub.backend.model.dto.WebSocketMessage;
 import com.pixelhub.backend.service.PixelService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Controller;
@@ -41,7 +42,10 @@ public class PixelController {
 
     @ResponseBody
     @GetMapping("/board-history")
-    public BoardResponse getBoardAtTime(@RequestParam("timestamp") Instant timestamp) {
+    public BoardResponse getBoardAtTime(
+            @RequestParam("timestamp") 
+            @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) 
+            Instant timestamp) {
         List<PixelDto> pixelDtos = pixelService.getBoardStateAtTime(timestamp).stream()
                 .map(p -> new PixelDto(p.getX(), p.getY(), p.getColor()))
                 .toList();

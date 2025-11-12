@@ -28,6 +28,33 @@ export class BoardLoaderService {
       this._loading.set(false);
     }
   }
+
+  async loadBoardHistory(timestamp: string): Promise<void> {
+    const token = this.authService.token();
+    if (!token) {
+      this.statusService.push('Sign in to view history.', 'warning');
+      return;
+    }
+    this._loading.set(true);
+    try {
+      const response = await this.boardApi.fetchBoardHistory(token, timestamp);
+      this.canvasState.loadPixels(response.pixels ?? []);
+      this.canvasState.setHistoryMode(true, timestamp);
+      this.statusService.push(`Loaded history: ${response.pixels.length} pixels at ${new Date(timestamp).toLocaleString()}.`, 'info');
+    } catch (error: any) {
+      const message = error?.error?.message || error?.message || 'Failed to load board history.';
+      this.statusService.push(message, 'error');
+      throw error;
+    } finally {
+      this._loading.set(false);
+    }
+  }
+
+  async resetToCurrent(): Promise<void> {
+    this.canvasState.resetToCurrent();
+    await this.initializeBoard();
+    this.statusService.push('Reset to current board state.', 'info');
+  }
 }
 
 

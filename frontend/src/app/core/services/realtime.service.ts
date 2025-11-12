@@ -39,6 +39,10 @@ export class RealtimeService {
       this.statusService.push('Connected to canvas.', 'success');
       this.client?.subscribe(this.configService.config().pixelTopic, (message: IMessage) => {
         try {
+          // Игнорируем обновления в режиме истории, чтобы не перезаписывать историческое состояние
+          if (this.canvasState.historyMode()) {
+            return;
+          }
           const payload = JSON.parse(message.body) as { type: string; content: PixelDto };
           if (payload.type === 'get' && payload.content) {
             this.canvasState.applyPixel(payload.content);

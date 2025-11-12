@@ -30,6 +30,15 @@
       <span>Loading board...</span>
     </div>
     <div class="board-overlay">
+      <div class="glass history-mode" *ngIf="historyMode()">
+        <div class="history-indicator">
+          <span class="icon">📜</span>
+          <div class="info">
+            <span class="label">History Mode</span>
+            <span class="timestamp">{{ getHistoryDisplayTime() }}</span>
+          </div>
+        </div>
+      </div>
       <div class="glass controls" *ngIf="!isMobile() || showOverlayCards()">
         <div class="cooldown" [class.waiting]="cooldownActive()">
           <span class="label">Cooldown</span>
@@ -75,7 +84,8 @@
     <canvas #boardCanvas></canvas>
   </div>
   <div class="hint">
-    <span>Drag to pan • Scroll / pinch to zoom • Click to place pixel</span>
+    <span *ngIf="!historyMode()">Drag to pan • Scroll / pinch to zoom • Click to place pixel</span>
+    <span *ngIf="historyMode()" class="history-hint">History mode active • Pixel placement disabled</span>
     <span class="coords" *ngIf="hoverPixel() as hp">Hovered: ({{ hp.x }}, {{ hp.y }})</span>
   </div>
 </section>

@@ -26,6 +26,11 @@ export class PixelPlacementService {
       return 'not-authenticated';
     }
 
+    if (this.canvasState.historyMode()) {
+      this.statusService.push('Cannot place pixels while viewing history. Reset to current state first.', 'warning');
+      return 'invalid';
+    }
+
     if (!this.canvasState.isValidPixel(pixel)) {
       this.statusService.push('Click inside the canvas bounds.', 'warning');
       return 'invalid';
