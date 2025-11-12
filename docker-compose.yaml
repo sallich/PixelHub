@@ -22,48 +22,6 @@ services:
       retries: 3
 
 
-  zookeeper:
-    image: confluentinc/cp-zookeeper:7.3.0
-    container_name: zookeeper
-    environment:
-      ZOOKEEPER_CLIENT_PORT: 2181
-      ZOOKEEPER_TICK_TIME: 2000
-    ports:
-      - "2181:2181"
-    networks:
-      - app-network
-    healthcheck:
-      test: ["CMD", "bash", "-c", "echo stat | nc localhost 2181"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-
-  kafka:
-    image: confluentinc/cp-kafka:7.3.0
-    container_name: kafka
-    depends_on:
-      zookeeper:
-        condition: service_healthy
-    environment:
-      KAFKA_BROKER_ID: 1
-      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
-      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
-      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
-    ports:
-      - "29092:29092"
-      - "9092:9092"
-    networks:
-      - app-network
-    healthcheck:
-      test: ["CMD", "kafka-topics", "--list", "--bootstrap-server", "localhost:9092"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-
   backend:
     build:
       context: ./backend
@@ -73,15 +31,11 @@ services:
 #      SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/pixelhub
 #      SPRING_DATASOURCE_USERNAME: postgres
 #      SPRING_DATASOURCE_PASSWORD: postgres
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
-#      SPRING_PROFILES_ACTIVE: docker
       DB_USERNAME: postgres
     ports:
       - "8080:8080"
     depends_on:
       postgres:
-        condition: service_healthy
-      kafka:
         condition: service_healthy
     networks:
       - app-network
@@ -99,8 +53,6 @@ services:
     container_name: pixelhub-frontend
     ports:
       - "4200:80"
-    depends_on:
-      - backend
     networks:
       - app-network
 
