@@ -6,11 +6,6 @@ import { StorageService } from './storage.service';
 import { UserStateService } from './user-state.service';
 import { TokenDto } from '../models/api.model';
 
-interface AuthenticateOptions {
-  forceNewToken?: boolean;
-  apiBaseChanged?: boolean;
-}
-
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private readonly http = inject(HttpClient);
@@ -27,14 +22,7 @@ export class AuthService {
   readonly isAuthenticating = computed(() => this._authenticating());
   readonly isAuthenticated = computed(() => !!this._token());
 
-  async authenticate(nickname: string, options: AuthenticateOptions = {}): Promise<TokenDto> {
-    const forceNewToken = options.forceNewToken ?? false;
-    const apiBaseChanged = options.apiBaseChanged ?? false;
-
-    if (apiBaseChanged) {
-      this.clearToken();
-    }
-
+  async authenticate(nickname: string, forceNewToken = false): Promise<TokenDto> {
     this._error.set(null);
     this._authenticating.set(true);
 

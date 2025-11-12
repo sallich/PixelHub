@@ -19,6 +19,8 @@ import { ConfigService } from '../../core/services/config.service';
 import { PixelPlacementService } from '../../core/services/pixel-placement.service';
 import { StatusService } from '../../core/services/status.service';
 import { BoardLoaderService } from '../../core/services/board-loader.service';
+import { CooldownService } from '../../core/services/cooldown.service';
+import { UserStateService } from '../../core/services/user-state.service';
 
 const MIN_ZOOM = 0.25;
 const MAX_ZOOM = 40;
@@ -38,12 +40,15 @@ interface PointerState {
 export class CanvasBoardComponent implements AfterViewInit {
   @ViewChild('boardCanvas', { static: true }) canvasRef!: ElementRef<HTMLCanvasElement>;
   @Output() authRequired = new EventEmitter<void>();
+  @Output() changeNickname = new EventEmitter<void>();
 
   private readonly canvasState = inject(CanvasStateService);
   private readonly configService = inject(ConfigService);
   private readonly placementService = inject(PixelPlacementService);
   private readonly statusService = inject(StatusService);
   private readonly boardLoader = inject(BoardLoaderService);
+  private readonly cooldownService = inject(CooldownService);
+  private readonly userState = inject(UserStateService);
   private readonly destroyRef = inject(DestroyRef);
 
   private readonly pointerState = new Map<number, PointerState>();
@@ -56,8 +61,20 @@ export class CanvasBoardComponent implements AfterViewInit {
   readonly scale = signal(8);
   readonly offset = signal({ x: 0, y: 0 });
   readonly hoverPixel = signal<{ x: number; y: number } | null>(null);
+  private readonly viewportWidth = signal(
+    typeof window !== 'undefined' ? window.innerWidth : 1024
+  );
   readonly boardDimensions = computed(() => this.canvasState.getDimensions());
   readonly isBoardLoading = computed(() => this.boardLoader.loading());
+  readonly isMobile = computed(() => this.viewportWidth() <= 768);
+  readonly cooldownActive = computed(() => this.cooldownService.isActive());
+  readonly cooldownLabel = computed(() => {
+    const remaining = this.cooldownService.remainingSeconds();
+    return remaining > 0 ? `${remaining}s` : 'Ready';
+  });
+  readonly nickname = computed(() => this.userState.nickname());
+  readonly pixelCount = computed(() => this.userState.pixelCount());
+  readonly showOverlayCards = signal(true);
   readonly hoverStyle = computed(() => {
     const pixel = this.hoverPixel();
     const scale = this.scale();
@@ -84,6 +101,15 @@ export class CanvasBoardComponent implements AfterViewInit {
       },
       { allowSignalWrites: true }
     );
+
+    effect(
+      () => {
+        if (!this.isMobile()) {
+          this.showOverlayCards.set(true);
+        }
+      },
+      { allowSignalWrites: true }
+    );
   }
 
   async ngAfterViewInit(): Promise<void> {
@@ -92,6 +118,9 @@ export class CanvasBoardComponent implements AfterViewInit {
 
   @HostListener('window:resize')
   onResize(): void {
+    if (typeof window !== 'undefined') {
+      this.viewportWidth.set(window.innerWidth);
+    }
     this.resizeCanvasToWrapper();
   }
 
@@ -113,6 +142,14 @@ export class CanvasBoardComponent implements AfterViewInit {
   centerCanvas(): void {
     this.resetViewport();
     this.hoverPixel.set(null);
+  }
+
+  toggleCards(): void {
+    if (!this.isMobile()) {
+      return;
+    }
+
+    this.showOverlayCards.update((value) => !value);
   }
 
   gotoX = '';
@@ -171,6 +208,10 @@ export class CanvasBoardComponent implements AfterViewInit {
     if (result === 'not-authenticated') {
       this.authRequired.emit();
     }
+  }
+
+  triggerNicknameChange(): void {
+    this.changeNickname.emit();
   }
 
   private initializeRenderer(): void {
@@ -242,9 +283,6 @@ export class CanvasBoardComponent implements AfterViewInit {
     };
 
     const click = (event: MouseEvent) => {
-      if (!this.placementService.placingEnabled()) {
-        return;
-      }
       if (this.pointerMoved) {
         this.pointerMoved = false;
         return;
