@@ -387,17 +387,35 @@ export class CanvasBoardComponent implements AfterViewInit {
     const prevScale = this.scale();
     if (Math.abs(newScale - prevScale) < 0.01) return;
 
-    const canvas = this.canvasRef.nativeElement;
-    const center = anchor ?? {
-      x: canvas.width / (2 * window.devicePixelRatio),
-      y: canvas.height / (2 * window.devicePixelRatio)
-    };
-    const boardPoint = anchor ?? this.canvasToBoard(center);
+    // anchor - это координаты доски (board coordinates), которые мы хотим сохранить на экране
+    // после изменения масштаба
+    const boardPoint = anchor ?? (() => {
+      // Если якорь не указан, используем центр экрана
+      const canvas = this.canvasRef.nativeElement;
+      const rect = canvas.getBoundingClientRect();
+      const center = {
+        x: rect.width / 2,
+        y: rect.height / 2
+      };
+      return this.canvasToBoard(center);
+    })();
+
+    // Вычисляем, где находится эта точка доски на экране при текущем масштабе
+    const prevCanvasPoint = this.boardToCanvas(boardPoint);
+
+    // Устанавливаем новый масштаб
     this.scale.set(newScale);
-    const canvasPoint = this.boardToCanvas(boardPoint);
+
+    // Вычисляем, где будет находиться эта точка доски при новом масштабе
+    const newCanvasPoint = this.boardToCanvas(boardPoint);
+
+    // Корректируем offset так, чтобы точка доски осталась на том же месте на экране
+    const dx = prevCanvasPoint.x - newCanvasPoint.x;
+    const dy = prevCanvasPoint.y - newCanvasPoint.y;
+    
     this.offset.set({
-      x: canvasPoint.x - boardPoint.x * this.scale(),
-      y: canvasPoint.y - boardPoint.y * this.scale()
+      x: this.offset().x + dx,
+      y: this.offset().y + dy
     });
   }
 
