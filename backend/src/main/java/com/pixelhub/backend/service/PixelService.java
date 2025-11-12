@@ -41,7 +41,7 @@ public class PixelService {
 
         userRepository.findByNickname(nickname).ifPresent(user -> {
             if (user.getLastPlacedAt() != null &&
-                Instant.now().isBefore(user.getLastPlacedAt().plusSeconds(RATE_LIMIT_SECONDS))) {
+                Instant.now().isBefore(user.getLastPlacedAt().plusSeconds(rateLimitSeconds))) {
                 return;
             }
 
