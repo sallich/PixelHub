@@ -1,0 +1,38 @@
+<aside class="sidebar">
+  <section class="card">
+    <h2>Session</h2>
+    <div class="session-info">
+      <div>
+        <span class="label">Nickname</span>
+        <span class="value">{{ nickname() || '—' }}</span>
+      </div>
+      <div>
+        <span class="label">Pixels placed</span>
+        <span class="value">{{ pixelCount() }}</span>
+      </div>
+    </div>
+    <button class="secondary" type="button" (click)="onChangeNickname()">Change nickname</button>
+  </section>
+
+  <section class="card">
+    <h2>Leaderboard</h2>
+    <ol class="leaderboard">
+      <li *ngFor="let user of leaderboard(); index as idx">
+        <span>{{ idx + 1 }}. {{ user.nickname }}</span>
+        <span class="score">{{ user.pixelCount }}</span>
+      </li>
+      <li *ngIf="leaderboard().length === 0">No data yet.</li>
+    </ol>
+  </section>
+
+  <section class="card">
+    <h2>Status</h2>
+    <ul class="status-messages">
+      <li *ngFor="let entry of statuses()" [attr.data-level]="entry.level">
+        {{ entry.text }}
+      </li>
+    </ul>
+  </section>
+</aside>
+
+

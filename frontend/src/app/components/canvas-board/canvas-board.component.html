@@ -1,0 +1,52 @@
+<section class="canvas-panel">
+  <div class="toolbar">
+    <label for="zoomRange">Zoom</label>
+    <input
+      id="zoomRange"
+      type="range"
+      min="0.25"
+      max="40"
+      step="0.25"
+      [value]="scale()"
+      (input)="handleZoomChange($event)"
+    />
+    <span>{{ zoomDisplay }}</span>
+    <button type="button" class="secondary" (click)="centerCanvas()">Center</button>
+    <form class="locator" (ngSubmit)="focusPixel()">
+      <label>Go to</label>
+      <input
+        type="number"
+        name="gotoX"
+        [(ngModel)]="gotoX"
+        [min]="0"
+        [max]="boardDimensions().width - 1"
+        placeholder="X"
+        required
+      />
+      <input
+        type="number"
+        name="gotoY"
+        [(ngModel)]="gotoY"
+        [min]="0"
+        [max]="boardDimensions().height - 1"
+        placeholder="Y"
+        required
+      />
+      <button type="submit" class="secondary">Go</button>
+    </form>
+  </div>
+  <div class="canvas-wrapper">
+    <div class="loading-overlay" *ngIf="isBoardLoading()">
+      <div class="spinner"></div>
+      <span>Loading board...</span>
+    </div>
+    <div class="hover-indicator" [ngStyle]="hoverStyle()"></div>
+    <canvas #boardCanvas></canvas>
+  </div>
+  <div class="hint">
+    <span>Drag to pan • Scroll / pinch to zoom • Click to place pixel</span>
+    <span class="coords" *ngIf="hoverPixel() as hp">Hovered: ({{ hp.x }}, {{ hp.y }})</span>
+  </div>
+</section>
+
+
