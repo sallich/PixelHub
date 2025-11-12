@@ -24,7 +24,6 @@ export class CanvasStateService {
   readonly palette = PALETTE_HEX;
 
   private readonly _selectedColor = signal(0);
-  private readonly _placingEnabled = signal(true);
 
   private boardWidth = 0;
   private boardHeight = 0;
@@ -35,7 +34,6 @@ export class CanvasStateService {
   private imageRevision = signal(0);
 
   readonly selectedColor = computed(() => this._selectedColor());
-  readonly placingEnabled = computed(() => this._placingEnabled());
   readonly revision = computed(() => this.imageRevision());
 
   initializeBoard(config: Pick<AppConfig, 'canvasWidth' | 'canvasHeight'>): void {
@@ -61,14 +59,6 @@ export class CanvasStateService {
     if (index >= 0 && index < this.palette.length) {
       this._selectedColor.set(index);
     }
-  }
-
-  togglePlacement(): void {
-    this._placingEnabled.update((value) => !value);
-  }
-
-  setPlacementEnabled(enabled: boolean): void {
-    this._placingEnabled.set(enabled);
   }
 
   loadPixels(pixels: PixelDto[]): void {
