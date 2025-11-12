@@ -231,13 +231,11 @@ export class CanvasBoardComponent implements AfterViewInit {
       event.preventDefault();
       const delta = -event.deltaY;
       const factor = delta > 0 ? 1.1 : 0.9;
-      const rect = canvas.getBoundingClientRect();
-      const canvasPoint = {
-        x: event.clientX - rect.left,
-        y: event.clientY - rect.top
-      };
-      const boardPoint = this.canvasToBoard(canvasPoint);
-      this.setZoom(this.scale() * factor, boardPoint);
+      const canvasPoint = this.getCanvasPointFromEvent(event);
+      if (canvasPoint) {
+        const boardPoint = this.canvasToBoard(canvasPoint);
+        this.setZoom(this.scale() * factor, boardPoint);
+      }
       this.updateHoverFromPointer(event.clientX, event.clientY);
     };
 
@@ -249,12 +247,10 @@ export class CanvasBoardComponent implements AfterViewInit {
         this.pointerMoved = false;
         return;
       }
-      const rect = canvas.getBoundingClientRect();
-      const canvasPoint = {
-        x: event.clientX - rect.left,
-        y: event.clientY - rect.top
-      };
-      this.placePixelFromClick(canvasPoint);
+      const canvasPoint = this.getCanvasPointFromEvent(event);
+      if (canvasPoint) {
+        this.placePixelFromClick(canvasPoint);
+      }
     };
 
     canvas.addEventListener('pointerdown', pointerDown);
@@ -282,12 +278,23 @@ export class CanvasBoardComponent implements AfterViewInit {
     const offscreen = this.canvasState.getOffscreenCanvas();
     if (!ctx || !offscreen) return;
 
+    const ratio = window.devicePixelRatio || 1;
+    
     ctx.save();
+    // Сбрасываем трансформацию и очищаем весь канвас
     ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    // Масштабируем для работы с CSS координатами
+    // После этого все координаты интерпретируются в CSS размерах (rect.width x rect.height)
+    ctx.scale(ratio, ratio);
+    
     const { x, y } = this.offset();
     const scale = this.scale();
-    ctx.setTransform(scale, 0, 0, scale, x, y);
+    
+    // Применяем пользовательский масштаб и offset
+    // Все координаты теперь в CSS пространстве благодаря предыдущему scale(ratio, ratio)
+    ctx.transform(scale, 0, 0, scale, x, y);
     ctx.imageSmoothingEnabled = false;
     ctx.drawImage(offscreen, 0, 0);
     ctx.restore();
@@ -299,10 +306,13 @@ export class CanvasBoardComponent implements AfterViewInit {
     if (!wrapper) return;
     const rect = wrapper.getBoundingClientRect();
     const ratio = window.devicePixelRatio || 1;
+    // Устанавливаем внутренние размеры канваса с учетом devicePixelRatio для четкости на Retina
     canvas.width = rect.width * ratio;
     canvas.height = rect.height * ratio;
     const ctx = canvas.getContext('2d');
-    ctx?.scale(ratio, ratio);
+    // НЕ используем ctx.scale(ratio, ratio), так как это создает проблемы с координатами
+    // Вместо этого работаем только с CSS координатами, а devicePixelRatio учитывается
+    // автоматически через внутренние размеры канваса
     this.resetViewport();
   }
 
@@ -313,9 +323,21 @@ export class CanvasBoardComponent implements AfterViewInit {
     const canvas = this.canvasRef.nativeElement;
     const { width, height } = this.canvasState.getDimensions();
     const ratio = window.devicePixelRatio || 1;
-    const displayWidth = canvas.width / ratio;
-    const displayHeight = canvas.height / ratio;
+    // Получаем CSS размеры canvas элемента
+    const rect = canvas.getBoundingClientRect();
+    const displayWidth = rect.width;
+    const displayHeight = rect.height;
     const scale = this.scale();
+    // В renderFrame используется setTransform(scale, 0, 0, scale, x, y).
+    // setTransform работает в логических координатах канваса после сброса трансформации.
+    // После setTransform(1, 0, 0, 1, 0, 0) координаты интерпретируются как координаты
+    // в логическом пространстве канваса, которое имеет размеры canvas.width x canvas.height.
+    // Но поскольку мы используем setTransform без учета предыдущего scale(ratio, ratio),
+    // и canvas.width = rect.width * ratio, логические координаты фактически соответствуют
+    // CSS размерам, умноженным на ratio. Однако offset применяется в координатах,
+    // соответствующих CSS размерам, так как мы вычисляем его как displayWidth = rect.width.
+    // Это работает корректно, потому что setTransform интерпретирует координаты относительно
+    // текущего состояния трансформации после сброса.
     this.offset.set({
       x: (displayWidth - width * scale) / 2,
       y: (displayHeight - height * scale) / 2
@@ -359,17 +381,62 @@ export class CanvasBoardComponent implements AfterViewInit {
     };
   }
 
+  /**
+   * Преобразует координаты события мыши в логические координаты канваса.
+   * 
+   * В renderFrame после setTransform(1, 0, 0, 1, 0, 0) координаты интерпретируются
+   * в пространстве canvas.width x canvas.height (которое = rect.width * ratio).
+   * Offset также умножается на ratio в renderFrame.
+   * 
+   * Поэтому для правильной работы нужно преобразовать CSS координаты клика
+   * в координаты пространства canvas.width x canvas.height, умножив на ratio.
+   * Но затем в canvasToBoard нужно использовать offset, также умноженный на ratio.
+   * 
+   * Однако проще работать в CSS координатах везде, поэтому возвращаем CSS координаты,
+   * а в canvasToBoard используем offset в CSS координатах (без умножения на ratio).
+   * Это работает, потому что соотношение сохраняется.
+   */
+  private getCanvasPointFromEvent(event: MouseEvent | PointerEvent | WheelEvent): { x: number; y: number } | null {
+    const canvas = this.canvasRef?.nativeElement;
+    if (!canvas) {
+      return null;
+    }
+
+    const rect = canvas.getBoundingClientRect();
+
+    // Получаем CSS координаты относительно canvas элемента
+    const cssX = event.clientX - rect.left;
+    const cssY = event.clientY - rect.top;
+
+    // Проверяем, что CSS координаты в пределах canvas
+    if (cssX < 0 || cssY < 0 || cssX > rect.width || cssY > rect.height) {
+      return null;
+    }
+
+    // Возвращаем координаты в CSS пространстве
+    // canvasToBoard использует offset в CSS координатах, поэтому все работает правильно
+    return { x: cssX, y: cssY };
+  }
+
   private updateHoverFromPointer(clientX: number, clientY: number): void {
     const canvas = this.canvasRef?.nativeElement;
     if (!canvas) {
       this.hoverPixel.set(null);
       return;
     }
-    const rect = canvas.getBoundingClientRect();
-    const canvasPoint = {
-      x: clientX - rect.left,
-      y: clientY - rect.top
-    };
+
+    // Создаем временный объект события для использования getCanvasPointFromEvent
+    const mockEvent = {
+      clientX,
+      clientY
+    } as MouseEvent;
+
+    const canvasPoint = this.getCanvasPointFromEvent(mockEvent);
+    if (!canvasPoint) {
+      this.hoverPixel.set(null);
+      return;
+    }
+
     const boardPoint = this.canvasToBoard(canvasPoint);
     const { width, height } = this.canvasState.getDimensions();
     const boardX = Math.floor(boardPoint.x);
