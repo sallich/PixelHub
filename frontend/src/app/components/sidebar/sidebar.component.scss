@@ -4,43 +4,24 @@
 }
 
 .sidebar {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  display: flex;
+  flex-direction: column;
   gap: 16px;
   width: 100%;
 }
 
 .card {
-  background: rgba(255, 255, 255, 0.08);
-  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.94);
+  border-radius: 20px;
   padding: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  backdrop-filter: blur(14px);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.25);
+  border: 1px solid rgba(222, 228, 241, 0.8);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 20px 44px rgba(28, 35, 51, 0.14);
 
   h2 {
     margin: 0 0 12px;
     font-size: 1.1rem;
-  }
-}
-
-.session-info {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-  margin-bottom: 16px;
-
-  .label {
-    display: block;
-    font-size: 0.8rem;
-    color: rgba(255, 255, 255, 0.6);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-  }
-
-  .value {
-    font-size: 1rem;
-    font-weight: 600;
+    color: #131a2b;
   }
 }
 
@@ -58,11 +39,12 @@
     align-items: center;
     padding: 10px 14px;
     border-radius: 12px;
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(243, 246, 255, 0.9);
     font-weight: 500;
+    color: #1f2940;
 
     .score {
-      color: #4ade80;
+      color: #2563eb;
     }
   }
 }
@@ -70,7 +52,7 @@
 .status-messages {
   margin: 0;
   padding-left: 18px;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(28, 35, 51, 0.65);
   font-size: 0.9rem;
   max-height: 180px;
   overflow-y: auto;
@@ -79,37 +61,21 @@
   gap: 8px;
 
   li[data-level='success'] {
-    color: #4ade80;
+    color: #16a34a;
   }
 
   li[data-level='warning'] {
-    color: #facc15;
+    color: #d97706;
   }
 
   li[data-level='error'] {
-    color: #f87171;
-  }
-}
-
-button.secondary {
-  border-radius: 999px;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  padding: 10px 18px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: transform 0.15s ease, background 0.2s ease;
-  background: rgba(255, 255, 255, 0.1);
-  color: inherit;
-
-  &:hover {
-    transform: translateY(-1px);
-    background: rgba(255, 255, 255, 0.12);
+    color: #dc2626;
   }
 }
 
 @media (max-width: 768px) {
   .sidebar {
-    grid-template-columns: 1fr;
+    gap: 14px;
   }
 }
 
