@@ -14,17 +14,6 @@
         (ngModelChange)="updateNickname($event)"
       />
     </label>
-    <label for="apiBaseInput">
-      API Base URL
-      <input
-        id="apiBaseInput"
-        name="apiBase"
-        type="url"
-        placeholder="http://localhost:8080"
-        [ngModel]="formModel().apiBase"
-        (ngModelChange)="updateApiBase($event)"
-      />
-    </label>
     <p class="auth-error" *ngIf="authError()">{{ authError() }}</p>
     <p class="help-text">Your nickname is used as an auth token for this demo backend.</p>
     <menu>

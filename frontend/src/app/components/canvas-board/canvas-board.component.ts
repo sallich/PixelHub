@@ -40,7 +40,6 @@ interface PointerState {
 export class CanvasBoardComponent implements AfterViewInit {
   @ViewChild('boardCanvas', { static: true }) canvasRef!: ElementRef<HTMLCanvasElement>;
   @Output() authRequired = new EventEmitter<void>();
-  @Output() openSettings = new EventEmitter<void>();
   @Output() changeNickname = new EventEmitter<void>();
 
   private readonly canvasState = inject(CanvasStateService);
@@ -209,10 +208,6 @@ export class CanvasBoardComponent implements AfterViewInit {
     if (result === 'not-authenticated') {
       this.authRequired.emit();
     }
-  }
-
-  triggerSettings(): void {
-    this.openSettings.emit();
   }
 
   triggerNicknameChange(): void {

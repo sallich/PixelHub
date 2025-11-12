@@ -2,7 +2,6 @@
   <main class="board-area">
     <app-canvas-board
       (authRequired)="requestAuth()"
-      (openSettings)="openSettings()"
       (changeNickname)="openAuthDialog()"
     ></app-canvas-board>
   </main>
@@ -13,6 +12,5 @@
 </div>
 
 <app-auth-dialog (authenticated)="handleAuthenticated()"></app-auth-dialog>
-<app-settings-dialog (settingsSaved)="handleSettingsSaved($event)"></app-settings-dialog>
 
 

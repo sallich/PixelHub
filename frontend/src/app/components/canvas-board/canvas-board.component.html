@@ -37,7 +37,6 @@
         </div>
         <div class="actions">
           <button type="button" class="secondary" (click)="triggerNicknameChange()">Change nickname</button>
-          <button type="button" class="secondary" (click)="triggerSettings()">Settings</button>
         </div>
       </div>
       <div class="glass session" [class.has-nickname]="nickname()" *ngIf="!isMobile() || showOverlayCards()">

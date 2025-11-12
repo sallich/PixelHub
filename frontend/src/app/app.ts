@@ -4,10 +4,6 @@ import { ToolbarComponent } from './components/toolbar/toolbar.component';
 import { CanvasBoardComponent } from './components/canvas-board/canvas-board.component';
 import { SidebarComponent } from './components/sidebar/sidebar.component';
 import { AuthDialogComponent } from './components/auth-dialog/auth-dialog.component';
-import {
-  SettingsDialogComponent,
-  SettingsResult
-} from './components/settings-dialog/settings-dialog.component';
 import { AuthService } from './core/services/auth.service';
 import { RealtimeService } from './core/services/realtime.service';
 import { BoardLoaderService } from './core/services/board-loader.service';
@@ -24,15 +20,13 @@ import { ConfigService } from './core/services/config.service';
     ToolbarComponent,
     CanvasBoardComponent,
     SidebarComponent,
-    AuthDialogComponent,
-    SettingsDialogComponent
+    AuthDialogComponent
   ],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })
 export class App implements AfterViewInit {
   @ViewChild(AuthDialogComponent) private authDialog!: AuthDialogComponent;
-  @ViewChild(SettingsDialogComponent) private settingsDialog!: SettingsDialogComponent;
 
   private readonly authService = inject(AuthService);
   private readonly realtimeService = inject(RealtimeService);
@@ -44,6 +38,7 @@ export class App implements AfterViewInit {
   private readonly destroyRef = inject(DestroyRef);
 
   constructor() {
+    console.log((import.meta as any).env)
     effect(() => {
       const token = this.authService.token();
       if (token) {
@@ -70,25 +65,6 @@ export class App implements AfterViewInit {
 
   async handleAuthenticated(): Promise<void> {
     await this.initializeAuthenticatedState();
-  }
-
-  openSettings(): void {
-    this.settingsDialog.open();
-  }
-
-  handleSettingsSaved(result: SettingsResult): void {
-    if (result.baseChanged) {
-      this.canvasState.initializeBoard(result.config);
-      this.statusService.push('API base changed. Please sign in again.', 'warning');
-      this.realtimeService.disconnect();
-      this.leaderboardService.stopAutoRefresh();
-      this.leaderboardService.clear();
-      this.authService.logout({ preserveNickname: true });
-      this.authDialog.open();
-      return;
-    }
-
-    this.initializeAuthenticatedState().catch((error) => console.error(error));
   }
 
   requestAuth(): void {
