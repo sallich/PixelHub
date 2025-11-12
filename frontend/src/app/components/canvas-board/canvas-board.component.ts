@@ -18,9 +18,10 @@ import { CanvasStateService } from '../../core/services/canvas-state.service';
 import { ConfigService } from '../../core/services/config.service';
 import { PixelPlacementService } from '../../core/services/pixel-placement.service';
 import { StatusService } from '../../core/services/status.service';
+import { BoardLoaderService } from '../../core/services/board-loader.service';
 
 const MIN_ZOOM = 0.25;
-const MAX_ZOOM = 20;
+const MAX_ZOOM = 40;
 
 interface PointerState {
   x: number;
@@ -42,6 +43,7 @@ export class CanvasBoardComponent implements AfterViewInit {
   private readonly configService = inject(ConfigService);
   private readonly placementService = inject(PixelPlacementService);
   private readonly statusService = inject(StatusService);
+  private readonly boardLoader = inject(BoardLoaderService);
   private readonly destroyRef = inject(DestroyRef);
 
   private readonly pointerState = new Map<number, PointerState>();
@@ -55,6 +57,7 @@ export class CanvasBoardComponent implements AfterViewInit {
   readonly offset = signal({ x: 0, y: 0 });
   readonly hoverPixel = signal<{ x: number; y: number } | null>(null);
   readonly boardDimensions = computed(() => this.canvasState.getDimensions());
+  readonly isBoardLoading = computed(() => this.boardLoader.loading());
   readonly hoverStyle = computed(() => {
     const pixel = this.hoverPixel();
     const scale = this.scale();

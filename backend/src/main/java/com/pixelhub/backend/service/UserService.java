@@ -1,5 +1,6 @@
 package com.pixelhub.backend.service;
 
+import com.pixelhub.backend.exception.NonUniqueUsernameException;
 import com.pixelhub.backend.model.entity.User;
 import com.pixelhub.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
@@ -27,13 +28,13 @@ public class UserService {
     }
 
     public User createByUsername(String username) {
-        return userRepository.findByNickname(username)
-                .orElseGet(() -> {
-                    User user = new User();
-                    user.setNickname(username);
-                    user.setPixelCount(0L);
-                    user.setLastPlacedAt(Instant.now().minusSeconds(rateLimitSeconds));
-                    return userRepository.save(user);
-                });
+        if (existsByNickname(username)) {
+            throw new NonUniqueUsernameException(username);
+        }
+        User user = new User();
+        user.setNickname(username);
+        user.setPixelCount(0L);
+        user.setLastPlacedAt(Instant.now().minusSeconds(rateLimitSeconds));
+        return userRepository.save(user);
     }
 }

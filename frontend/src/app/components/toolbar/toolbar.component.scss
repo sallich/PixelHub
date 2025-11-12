@@ -1,48 +1,68 @@
+:host {
+  display: block;
+  width: 100%;
+}
+
 .top-bar {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 16px;
   background: rgba(255, 255, 255, 0.08);
   border-radius: 16px;
-  padding: 16px 24px;
+  padding: 18px 22px 20px;
   backdrop-filter: blur(16px);
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.3);
   border: 1px solid rgba(255, 255, 255, 0.05);
+  width: 100%;
+}
+
+.top-row {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  justify-content: space-between;
+  flex-wrap: wrap;
 }
 
 .brand {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
   h1 {
     margin: 0;
-    font-size: 1.6rem;
+    font-size: 1.55rem;
     letter-spacing: -0.02em;
   }
 
   .tagline {
-    display: block;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     color: rgba(255, 255, 255, 0.6);
-    margin-top: -4px;
   }
 }
 
-.controls {
+.actions {
   display: flex;
   align-items: center;
   gap: 16px;
+  flex-wrap: wrap;
 }
 
 .color-picker {
   display: grid;
-  grid-template-columns: repeat(8, 24px);
-  gap: 6px;
-  padding: 10px 12px;
+  grid-template-columns: repeat(auto-fit, minmax(32px, 1fr));
+  grid-auto-rows: 32px;
+  gap: 10px;
+  padding: 14px 16px;
   background: rgba(255, 255, 255, 0.12);
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.08);
+  min-width: min(100%, 320px);
+  max-width: 100%;
 
   button {
-    width: 24px;
-    height: 24px;
+    width: 32px;
+    height: 32px;
     border-radius: 6px;
     border: 1px solid rgba(255, 255, 255, 0.15);
     box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.4);
@@ -57,17 +77,39 @@
   }
 }
 
+.palette-row {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  align-items: center;
+  gap: 16px;
+}
+
+.palette-label {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: rgba(255, 255, 255, 0.55);
+}
+
 .cooldown {
   display: flex;
-  align-items: baseline;
-  gap: 6px;
-  font-size: 0.95rem;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
 
   .label {
+    font-size: 0.75rem;
     color: rgba(255, 255, 255, 0.6);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
   }
 
   .value {
+    font-weight: 600;
+    font-size: 0.95rem;
+
     &.ready {
       color: #4ade80;
     }
@@ -110,18 +152,46 @@ button {
 
 @media (max-width: 768px) {
   .top-bar {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 16px;
+    padding: 16px;
+    gap: 14px;
   }
 
-  .controls {
-    flex-wrap: wrap;
-    justify-content: flex-start;
+  .top-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .brand h1 {
+    font-size: 1.35rem;
+  }
+
+  .brand .tagline {
+    font-size: 0.8rem;
   }
 
   .color-picker {
-    grid-template-columns: repeat(6, 24px);
+    grid-template-columns: repeat(auto-fit, minmax(32px, 1fr));
+    gap: 8px;
+  }
+
+  .actions {
+    width: 100%;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .actions button {
+    flex: 1 1 0;
+  }
+
+  .palette-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .palette-label {
+    display: none;
   }
 }
 

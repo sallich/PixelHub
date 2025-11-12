@@ -2,9 +2,9 @@
   display: flex;
   flex-direction: column;
   min-height: 100vh;
-  max-width: 1440px;
-  margin: 0 auto;
-  padding: 24px;
+  width: 100%;
+  padding: 24px 40px 32px;
+  box-sizing: border-box;
   gap: 24px;
 }
 
@@ -17,19 +17,52 @@ body {
   background: linear-gradient(160deg, #141622, #08090f);
 }
 
-.layout {
-  display: flex;
-  gap: 24px;
+.board-area {
   flex: 1;
+  display: flex;
+  width: 100%;
+  min-height: 0;
 }
 
-@media (max-width: 1100px) {
+.hud {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(320px, 1fr);
+  gap: 24px;
+  align-items: start;
+}
+
+@media (max-width: 1280px) {
   #app {
-    padding: 16px;
+    padding: 20px 24px 28px;
+    gap: 20px;
   }
 
-  .layout {
-    flex-direction: column;
+  .hud {
+    grid-template-columns: minmax(0, 1.6fr) minmax(280px, 1fr);
+    gap: 20px;
+  }
+}
+
+@media (max-width: 900px) {
+  #app {
+    padding: 16px;
+    gap: 16px;
+  }
+
+  .hud {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .board-area {
+    min-height: 320px;
+  }
+}
+
+@media (max-width: 600px) {
+  #app {
+    padding: 12px;
+    gap: 12px;
   }
 }
 
