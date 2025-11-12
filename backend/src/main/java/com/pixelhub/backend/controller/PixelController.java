@@ -41,8 +41,7 @@ public class PixelController {
 
     @ResponseBody
     @GetMapping("/board-history")
-    public BoardResponse getBoardAtTime(@RequestParam("timestamp") long epochSeconds) {
-        Instant timestamp = Instant.ofEpochSecond(epochSeconds);
+    public BoardResponse getBoardAtTime(@RequestParam("timestamp") Instant timestamp) {
         List<PixelDto> pixelDtos = pixelService.getBoardStateAtTime(timestamp).stream()
                 .map(p -> new PixelDto(p.getX(), p.getY(), p.getColor()))
                 .toList();
