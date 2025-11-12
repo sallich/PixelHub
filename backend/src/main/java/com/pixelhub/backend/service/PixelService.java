@@ -1,18 +1,16 @@
 package com.pixelhub.backend.service;
 
 import com.pixelhub.backend.model.dto.PixelDto;
-import com.pixelhub.backend.model.dto.WebSocketMessage;
+import com.pixelhub.backend.model.dto.PixelPlacedEvent;
 import com.pixelhub.backend.model.entity.Pixel;
 import com.pixelhub.backend.repository.PixelRepository;
 import com.pixelhub.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.messaging.simp.SimpMessagingTemplate;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 @Service
@@ -21,21 +19,22 @@ public class PixelService {
 
     private final UserRepository userRepository;
     private final PixelRepository pixelRepository;
-    private final SimpMessagingTemplate messagingTemplate;
+    private final KafkaTemplate<String, PixelPlacedEvent> kafkaTemplate;
 
     @Value("${app.rate-limit-seconds:30}")
-    private static int RATE_LIMIT_SECONDS;
+    private int RATE_LIMIT_SECONDS;
     @Value("${app.canvas-width:2000}")
-    private static int CANVAS_WIDTH;
+    private int CANVAS_WIDTH;
     @Value("${app.canvas-height:2000}")
-    private static int CANVAS_HEIGHT;
+    private int CANVAS_HEIGHT;
     @Value("${app.min-color:0}")
-    private static int MIN_COLOR;
+    private int MIN_COLOR;
     @Value("${app.max-color:127}")
-    private static int MAX_COLOR;
+    private int MAX_COLOR;
 
+    @Value("${pixel.kafka.topic:pixel-placed}")
+    private String TOPIC;
 
-    @Transactional
     public void placePixel(PixelDto request, String nickname) {
         if (!isValid(request)) {
             return;
@@ -43,23 +42,15 @@ public class PixelService {
 
         userRepository.findByNickname(nickname).ifPresent(user -> {
             if (user.getLastPlacedAt() != null &&
-                Instant.now().isBefore(user.getLastPlacedAt().plus(RATE_LIMIT_SECONDS, ChronoUnit.SECONDS))) {
+                Instant.now().isBefore(user.getLastPlacedAt().plusSeconds(RATE_LIMIT_SECONDS))) {
                 return;
             }
 
-            Pixel pixel = new Pixel();
-            pixel.setX(request.getX());
-            pixel.setY(request.getY());
-            pixel.setColor(request.getC());
-            pixel.setPlacedAt(Instant.now());
-            pixelRepository.save(pixel);
-
             user.setPixelCount(user.getPixelCount() + 1);
             user.setLastPlacedAt(Instant.now());
-            userRepository.save(user);
 
-            WebSocketMessage<PixelDto> broadcastMessage = new WebSocketMessage<>("get", request);
-            messagingTemplate.convertAndSend("/topic/pixels", broadcastMessage);
+            PixelPlacedEvent event = new PixelPlacedEvent(request, user);
+            kafkaTemplate.send(TOPIC, event);
         });
     }
 
