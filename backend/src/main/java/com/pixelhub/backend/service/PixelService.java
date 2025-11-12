@@ -24,16 +24,15 @@ public class PixelService {
     private final SimpMessagingTemplate messagingTemplate;
 
     @Value("${app.rate-limit-seconds:30}")
-    private int RATE_LIMIT_SECONDS;
+    private int rateLimitSeconds;
     @Value("${app.canvas-width:2000}")
-    private int CANVAS_WIDTH;
+    private int canvasWidth;
     @Value("${app.canvas-height:2000}")
-    private int CANVAS_HEIGHT;
+    private int canvasHeight;
     @Value("${app.min-color:0}")
-    private int MIN_COLOR;
+    private int minColor;
     @Value("${app.max-color:127}")
-    private int MAX_COLOR;
-
+    private int maxColor;
 
     @Transactional
     public void placePixel(PixelDto request, String nickname) {
@@ -43,7 +42,7 @@ public class PixelService {
 
         userRepository.findByNickname(nickname).ifPresent(user -> {
             if (user.getLastPlacedAt() != null &&
-                Instant.now().isBefore(user.getLastPlacedAt().plus(RATE_LIMIT_SECONDS, ChronoUnit.SECONDS))) {
+                Instant.now().isBefore(user.getLastPlacedAt().plus(rateLimitSeconds, ChronoUnit.SECONDS))) {
                 return;
             }
 
@@ -72,8 +71,8 @@ public class PixelService {
     }
 
     private boolean isValid(PixelDto request) {
-        return request.getX() != null && request.getX() >= 0 && request.getX() < CANVAS_WIDTH &&
-               request.getY() != null && request.getY() >= 0 && request.getY() < CANVAS_HEIGHT &&
-               request.getC() != null && request.getC() >= MIN_COLOR && request.getC() <= MAX_COLOR;
+        return request.getX() != null && request.getX() >= 0 && request.getX() < canvasWidth &&
+               request.getY() != null && request.getY() >= 0 && request.getY() < canvasHeight &&
+               request.getC() != null && request.getC() >= minColor && request.getC() <= maxColor;
     }
 }
