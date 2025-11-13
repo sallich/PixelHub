@@ -4,11 +4,11 @@ const path = require('path');
 const env = process.env;
 
 const environment = {
-  production: false,
-  apiBase: env.NG_APP_API_BASE || 'http://localhost:8080',
+  production: true,
+  apiBase: env.NG_APP_API_BASE || '/api',
   canvasWidth: parseInt(env.NG_APP_CANVAS_WIDTH || '2000', 10),
   canvasHeight: parseInt(env.NG_APP_CANVAS_HEIGHT || '2000', 10),
-  rateLimitSeconds: parseInt(env.NG_APP_RATE_LIMIT_SECONDS || '1', 10)
+  rateLimitSeconds: parseInt(env.NG_APP_RATE_LIMIT_SECONDS || '30', 10)
 };
 
 const envDir = path.join(__dirname, '../src/environments');
