@@ -3,7 +3,7 @@ FROM node:22-alpine as build
 WORKDIR /app
 
 # Define build arguments
-ARG NG_APP_API_BASE=http://localhost:8080
+ARG NG_APP_API_BASE=/api
 ARG NG_APP_CANVAS_WIDTH=2000
 ARG NG_APP_CANVAS_HEIGHT=2000
 ARG NG_APP_RATE_LIMIT_SECONDS=30
@@ -23,8 +23,8 @@ RUN npm ci --only=production=false
 # Copy source code
 COPY . .
 
-# Build the application (prebuild hook will run generate-env.js automatically)
-RUN npm run build
+# Build with production configuration explicitly
+RUN npm run build -- --configuration=production
 
 FROM nginx:alpine
 
