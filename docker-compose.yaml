@@ -1,7 +1,6 @@
 version: '3.8'
 
 services:
-
   postgres:
     image: postgres:15-alpine
     container_name: pixelhub-postgres
@@ -16,11 +15,10 @@ services:
     networks:
       - app-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER}"]
       interval: 30s
       timeout: 10s
       retries: 3
-
 
   backend:
     build:
@@ -28,7 +26,7 @@ services:
       dockerfile: Dockerfile
     container_name: pixelhub-backend
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/pixelhub
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB}
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
       DB_USERNAME: ${POSTGRES_USER}
@@ -42,25 +40,21 @@ services:
         condition: service_healthy
     networks:
       - app-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
 
   frontend:
     build:
       context: ./frontend
       dockerfile: Dockerfile
+      args:
+        NG_APP_API_BASE: /api
+        NG_APP_CANVAS_WIDTH: 2000
+        NG_APP_CANVAS_HEIGHT: 2000
+        NG_APP_RATE_LIMIT_SECONDS: 30
     container_name: pixelhub-frontend
-    environment:
-      NG_APP_API_BASE: http://backend:8080
-      NG_APP_CANVAS_WIDTH: 2000
-      NG_APP_CANVAS_HEIGHT: 2000
-      NG_APP_RATE_LIMIT_SECONDS: 30
     ports:
       - "8081:80"
+    depends_on:
+      - backend
     networks:
       - app-network
 
