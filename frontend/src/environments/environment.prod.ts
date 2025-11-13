@@ -1,8 +1,8 @@
 export const environment = {
   production: true,
-  apiBase: '',
+  apiBase: 'http://localhost:8080',
   canvasWidth: 2000,
   canvasHeight: 2000,
-  rateLimitSeconds: 1
+  rateLimitSeconds: 30
 };
 

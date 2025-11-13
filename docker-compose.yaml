@@ -6,9 +6,9 @@ services:
     image: postgres:15-alpine
     container_name: pixelhub-postgres
     environment:
-      POSTGRES_DB: pixelhub
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
     ports:
       - "5432:5432"
     volumes:
@@ -28,10 +28,12 @@ services:
       dockerfile: Dockerfile
     container_name: pixelhub-backend
     environment:
-#      SPRING_DATASOURCE_URL: jdbc:postgresql://localhost:5432/pixelhub
-#      SPRING_DATASOURCE_USERNAME: postgres
-#      SPRING_DATASOURCE_PASSWORD: postgres
-      DB_USERNAME: postgres
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD}
+      DB_USERNAME: ${POSTGRES_USER}
+      DB_PASSWORD: ${POSTGRES_PASSWORD}
+      JWT_SECRET: ${JWT_SECRET}
+      RATE_LIMIT: ${RATE_LIMIT}
     ports:
       - "8080:8080"
     depends_on:
@@ -51,6 +53,11 @@ services:
       context: ./frontend
       dockerfile: Dockerfile
     container_name: pixelhub-frontend
+    environment:
+      NG_APP_API_BASE: http://localhost:8080
+      NG_APP_CANVAS_WIDTH: 2000
+      NG_APP_CANVAS_HEIGHT: 2000
+      NG_APP_RATE_LIMIT_SECONDS: 30
     ports:
       - "80:80"
     networks:
