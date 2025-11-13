@@ -48,7 +48,7 @@
           <button type="button" class="secondary" (click)="triggerNicknameChange()">Change nickname</button>
         </div>
       </div>
-      <div class="glass session" [class.has-nickname]="nickname()" *ngIf="!isMobile() || showOverlayCards()">
+      <div class="glass session" [class.has-nickname]="nickname()" *ngIf="!isMobile() && showOverlayCards()">
         <span class="label">Session</span>
         <span class="nickname">{{ nickname() || '—' }}</span>
         <span class="pixels">{{ pixelCount() }} px</span>

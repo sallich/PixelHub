@@ -81,7 +81,7 @@ export class CanvasBoardComponent implements AfterViewInit {
   });
   readonly nickname = computed(() => this.userState.nickname());
   readonly pixelCount = computed(() => this.userState.pixelCount());
-  readonly showOverlayCards = signal(true);
+  readonly showOverlayCards = signal(false);
   readonly historyMode = computed(() => this.canvasState.historyMode());
   readonly historyTimestamp = computed(() => this.canvasState.historyTimestamp());
   readonly hoverStyle = computed(() => {
@@ -113,8 +113,11 @@ export class CanvasBoardComponent implements AfterViewInit {
 
     effect(
       () => {
+        // На десктопе всегда показываем overlay, на мобильных скрываем по умолчанию
         if (!this.isMobile()) {
           this.showOverlayCards.set(true);
+        } else {
+          this.showOverlayCards.set(false);
         }
       },
       { allowSignalWrites: true }
