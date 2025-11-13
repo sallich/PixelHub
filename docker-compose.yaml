@@ -59,7 +59,7 @@ services:
       NG_APP_CANVAS_HEIGHT: 2000
       NG_APP_RATE_LIMIT_SECONDS: 30
     ports:
-      - "80:80"
+      - "8081:80"
     networks:
       - app-network
 
