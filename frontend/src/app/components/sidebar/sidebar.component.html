@@ -11,15 +11,6 @@
       <li *ngIf="leaderboard().length === 0">No data yet.</li>
     </ol>
   </section>
-
-  <section class="card">
-    <h2>Status</h2>
-    <ul class="status-messages">
-      <li *ngFor="let entry of statuses()" [attr.data-level]="entry.level">
-        {{ entry.text }}
-      </li>
-    </ul>
-  </section>
 </aside>
 
 
